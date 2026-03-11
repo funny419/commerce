@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }} - Flask Board{% endblock %}
+{% block content %}
+<!-- 게시물 -->
+<div class="card my-3">
+    <div class="card-body">
+        <h1 class="card-title">{{ post.title }}</h1>
+        <div class="card-subtitle mb-2 text-muted">
+            <span>작성자: <a href="{{ url_for('user_profile', username=post.author.username) }}" class="text-muted">{{
+                    post.author.username }}</a></span>
+            <span class="ml-2">추천: <span class="badge badge-success">{{ post.voters|length }}</span></span>
+        </div>
+        <hr>
+        <div class="card-text" style="white-space: pre-line; min-height: 150px;">{{ post.content }}</div>
+        <div class="d-flex justify-content-center my-3">
+            {% if g.user and g.user != post.author %}
+            <form action="{{ url_for('vote_post', post_id=post.id) }}" method="post">
+                <button type="submit" class="btn btn-success">
+                    {% if g.user in post.voters %}추천 취소{% else %}추천{% endif %}
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% if g.user and g.user.id == post.author.id %}
+        <div>
+            <a href="{{ url_for('update_post', post_id=post.id) }}" class="btn btn-sm btn-outline-secondary">수정</a>
+            <form action="{{ url_for('delete_post', post_id=post.id) }}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger"
+                    onclick="return confirm('정말로 삭제하시겠습니까?');">삭제</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 답변 -->
+<h3 class="mt-5">답변 ({{ answers|length }})</h3>
+<hr>
+<div class="answers-section">
+    {% for answer in answers %}
+    <div class="card mb-3 {% if answer.is_adopted %}border-success{% endif %}" id="answer-{{ answer.id }}">
+        <div class="card-body">
+            {% if answer.is_adopted %}
+            <span class="badge badge-success mb-2">채택된 답변</span>
+            {% endif %}
+            <h5 class="card-title">{{ answer.title }}</h5>
+            <div class="card-text" style="white-space: pre-line;">{{ answer.content }}</div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <small class="text-muted">
+                    작성자: <strong><a href="{{ url_for('user_profile', username=answer.author.username) }}"
+                            class="text-muted">{{ answer.author.username }}</a></strong> ({{
+                    answer.timestamp.strftime('%Y-%m-%d %H:%M')
+                    }})
+                </small>
+                <div>
+                    {% if g.user and g.user.id == post.author.id and not answer.is_adopted and post.author.id !=
+                    answer.author.id %}
+                    <form action="{{ url_for('adopt_answer', answer_id=answer.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-success">채택</button>
+                    </form>
+                    {% endif %}
+                    {% if g.user and g.user.id == answer.author.id %}
+                    <a href="{{ url_for('update_answer', answer_id=answer.id) }}"
+                        class="btn btn-sm btn-outline-secondary">수정</a>
+                    <form action="{{ url_for('delete_answer', answer_id=answer.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('정말로 이 답변을 삭제하시겠습니까?');">삭제</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p>아직 등록된 답변이 없습니다.</p>
+    {% endfor %}
+</div>
+
+<!-- 답변 작성 -->
+{% if g.user %}
+<form action="{{ url_for('create_answer', post_id=post.id) }}" method="post" class="my-4">
+    <h4>답변 작성</h4>
+    <div class="form-group">
+        <label for="answer_title">답변 제목</label>
+        <input type="text" id="answer_title" name="title" class="form-control" required value="RE: {{ post.title }}">
+    </div>
+    <div class="form-group">
+        <label for="answer_content">답변 내용</label>
+        <textarea name="content" id="answer_content" class="form-control" rows="5" required
+            placeholder="답변 내용을 입력하세요..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">답변 등록</button>
+</form>
+{% else %}
+<div class="alert alert-info my-4">답변을 작성하려면 <a href="{{ url_for('login') }}" class="alert-link">로그인</a>이 필요합니다.</div>
+{% endif %}
+
+<!-- 댓글 -->
+<h3 class="mt-5">댓글</h3>
+<hr>
+<div class="comments-section mb-4">
+    {% for comment in comments %}
+    <div class="comment border-bottom pb-2 mb-2">
+        <strong><a href="{{ url_for('user_profile', username=comment.author.username) }}" class="text-dark">{{
+                comment.author.username }}</a></strong>
+        <small class="text-muted">({{ comment.timestamp.strftime('%Y-%m-%d %H:%M') }})</small>
+        <div style="white-space: pre-line;" class="mt-1">{{ comment.content }}</div>
+        {% if g.user and g.user.id == comment.author.id %}
+        <div class="mt-1">
+            <a href="{{ url_for('update_comment', comment_id=comment.id) }}"
+                class="btn btn-sm btn-link text-secondary">수정</a>
+            <form action="{{ url_for('delete_comment', comment_id=comment.id) }}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-link text-danger"
+                    onclick="return confirm('정말로 이 댓글을 삭제하시겠습니까?');">삭제</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <p>첫 번째 댓글을 남겨보세요!</p>
+    {% endfor %}
+</div>
+
+<!-- 댓글 작성 -->
+{% if g.user %}
+<form method="post" class="my-3">
+    <div class="form-group">
+        <textarea name="content" class="form-control" rows="3" required placeholder="댓글을 입력하세요..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-secondary">댓글 작성</button>
+</form>
+{% else %}
+<div class="alert alert-info">댓글을 작성하려면 <a href="{{ url_for('login') }}" class="alert-link">로그인</a>이 필요합니다.</div>
+{% endif %}
+
+<div class="text-center mt-4">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">목록으로 돌아가기</a>
+</div>
+{% endblock %}

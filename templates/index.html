@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-between my-3">
+    <div class="col-md-8">
+        <h2 class="mb-3">게시물 목록 (총 {{ posts.total }}건)</h2>
+    </div>
+    <div class="col-md-4">
+        <form method="get" action="{{ url_for('index') }}" class="form-inline">
+            <div class="input-group">
+                <input type="text" name="keyword" class="form-control" value="{{ keyword or '' }}" placeholder="검색어">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">검색</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<ul class="list-group mb-4">
+    {% for post in posts.items %}
+    <li class="list-group-item">
+        <a href="{{ url_for('post_detail', post_id=post.id) }}">{{ post.title }}</a>
+        <span class="badge badge-primary ml-2" title="추천 수">{{ post.voters|length }}</span>
+        <span class="badge badge-secondary" title="댓글 수">{{ post.comments.count() }}</span>
+        <small class="ml-2 text-muted">작성자: <a href="{{ url_for('user_profile', username=post.author.username) }}"
+                class="text-muted">{{ post.author.username }}</a></small>
+        {% if post.answers.count() > 0 %}
+        <ul class="list-unstyled mt-2" style="padding-left: 20px;">
+            {% for answer in post.answers %}
+            <li class="small text-muted">
+                └ <a href="{{ url_for('post_detail', post_id=post.id) }}#answer-{{ answer.id }}"
+                    class="text-secondary">{{
+                    answer.title }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </li>
+    {% else %}
+    <li class="list-group-item">게시물이 없습니다.</li>
+    {% endfor %}
+</ul>
+
+<!-- 페이지네이션 -->
+<ul class="pagination justify-content-center">
+    <li class="page-item {{ 'disabled' if not posts.has_prev }}">
+        <a class="page-link" href="{{ url_for('index', page=posts.prev_num, keyword=keyword) }}">이전</a>
+    </li>
+    {% for page_num in posts.iter_pages() %}
+    {% if page_num %}
+    <li class="page-item {{ 'active' if posts.page == page_num }}">
+        <a class="page-link" href="{{ url_for('index', page=page_num, keyword=keyword) }}">{{ page_num }}</a>
+    </li>
+    {% else %}
+    <li class="page-item disabled"><span class="page-link">...</span></li>
+    {% endif %}
+    {% endfor %}
+    <li class="page-item {{ 'disabled' if not posts.has_next }}">
+        <a class="page-link" href="{{ url_for('index', page=posts.next_num, keyword=keyword) }}">다음</a>
+    </li>
+</ul>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}프로필 수정{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>프로필 수정</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="form-group">
+                        <label for="username">사용자 이름</label>
+                        <input type="text" id="username" name="username" class="form-control"
+                            value="{{ g.user.username }}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">이메일</label>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ g.user.email }}"
+                            required>
+                    </div>
+                    <hr>
+                    <p class="text-muted">비밀번호를 변경하려면 아래 필드를 입력하세요. 변경하지 않으려면 비워두세요.</p>
+                    <div class="form-group">
+                        <label for="new_password">새 비밀번호</label>
+                        <input type="password" id="new_password" name="new_password" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_new_password">새 비밀번호 확인</label>
+                        <input type="password" id="confirm_new_password" name="confirm_new_password"
+                            class="form-control">
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <label for="password">현재 비밀번호 (변경 사항을 저장하려면 필수)</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">변경 사항 저장</button>
+                    <a href="{{ url_for('user_profile', username=g.user.username) }}" class="btn btn-secondary">취소</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
