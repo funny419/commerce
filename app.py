@@ -52,6 +52,8 @@ class Post(db.Model):
     answers = db.relationship('Answer', backref='post', lazy='dynamic', cascade="all, delete-orphan")
     # Post 모델에서 추천인 정보에 접근할 수 있도록 관계를 설정합니다.
     voters = db.relationship('User', secondary=post_voter, backref=db.backref('voted_posts', lazy='dynamic'))
+    # 조회수 필드 추가
+    view_count = db.Column(db.Integer, default=0, nullable=False)
 
 # --- 댓글 모델(데이터베이스 테이블) 정의 ---
 class Comment(db.Model):
@@ -186,6 +188,12 @@ def post_detail(post_id):
             db.session.commit()
             flash('댓글이 작성되었습니다.', 'success')
         return redirect(url_for('post_detail', post_id=post_id))
+
+    # 이 코드는 POST 요청 시에는 실행되지 않고, GET 요청 시에만 실행됩니다.
+    # 조회수를 1 증가시킵니다.
+    # (post.view_count or 0)은 혹시 모를 null 값에 대비한 안전장치입니다.
+    post.view_count = (post.view_count or 0) + 1
+    db.session.commit()
 
     comments = post.comments.order_by(Comment.timestamp.asc()).all()
     answers = post.answers.order_by(Answer.timestamp.asc()).all()

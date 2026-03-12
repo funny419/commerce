@@ -22,6 +22,7 @@
         <a href="{{ url_for('post_detail', post_id=post.id) }}">{{ post.title }}</a>
         <span class="badge badge-primary ml-2" title="추천 수">{{ post.voters|length }}</span>
         <span class="badge badge-secondary" title="댓글 수">{{ post.comments.count() }}</span>
+        <span class="badge badge-info" title="조회수">{{ post.view_count }}</span>
         <small class="ml-2 text-muted">작성자: <a href="{{ url_for('user_profile', username=post.author.username) }}"
                 class="text-muted">{{ post.author.username }}</a></small>
         {% if post.answers.count() > 0 %}

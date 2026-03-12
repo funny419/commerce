@@ -1,14 +1,7 @@
 {
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.autoImportCompletions": true,
-    "python.analysis.fixAll": [
-        "source.unusedImports",
-        "source.convertImportFormat"
-    ],
-    "notebook.output.wordWrap": true,
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.unusedImports": "always",
-        "source.organizeImports": "explicit"
-    }
+    "terminal.integrated.shellArgs.windows": [
+        "-NoExit",
+        "-Command",
+        ".venv\\Scripts\\Activate.ps1"
+    ]
 }

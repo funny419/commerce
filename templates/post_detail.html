@@ -9,6 +9,7 @@
             <span>작성자: <a href="{{ url_for('user_profile', username=post.author.username) }}" class="text-muted">{{
                     post.author.username }}</a></span>
             <span class="ml-2">추천: <span class="badge badge-success">{{ post.voters|length }}</span></span>
+            <span class="ml-2">조회: <span class="badge badge-secondary">{{ post.view_count }}</span></span>
         </div>
         <hr>
         <div class="card-text" style="white-space: pre-line; min-height: 150px;">{{ post.content }}</div>
