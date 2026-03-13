@@ -11,6 +11,7 @@
 - **Frontend:** HTML5, CSS3, JavaScript (jQuery)
 - **UI Framework:** Bootstrap 4.6
 - **Editor:** Summernote (WYSIWYG)
+- **DevOps:** Docker, Jenkins
 
 ## 3. 데이터베이스 정책 (Database Policy)
 
@@ -103,3 +104,31 @@ $('#comment_content').summernote({
 - **파일 업로드:** 현재 에디터 이미지는 Base64로 저장되므로, 서버 파일 시스템 저장 방식으로 변경 고려.
 - **답변 추천 백엔드:** UI는 구현되었으나 백엔드 라우트(`vote_answer`) 및 DB 모델(`voters`) 연결 필요.
 - **보안 강화:** `bleach` 라이브러리를 도입하여 HTML 태그 화이트리스트 필터링 적용 필요.
+
+## 8. 테스트 (Testing)
+- **프레임워크:** Python 표준 라이브러리 `unittest` 사용.
+- **실행 파일:** `tests.py`
+- **실행 환경:** 테스트는 실제 DB에 영향을 주지 않도록 메모리 기반의 **SQLite** (`sqlite:///:memory:`)를 사용하여 독립적으로 수행됩니다.
+- **실행 방법:**
+  ```bash
+  python tests.py
+  ```
+
+## 9. CI/CD (지속적 통합/배포)
+- **도구:** Jenkins, Docker
+- **파이프라인 정의:** `Jenkinsfile` (Groovy Script)
+- **배포 환경:** `Dockerfile`을 사용하여 Gunicorn 기반의 WSGI 서버 환경을 구축합니다.
+
+### 9.1. Jenkins 파이프라인 단계
+1.  **Environment Check:** Jenkins 에이전트의 Docker 환경을 확인합니다.
+2.  **Build:** `Dockerfile`을 사용하여 애플리케이션의 Docker 이미지를 빌드합니다. 이 과정에서 소스 코드와 `requirements.txt`에 명시된 의존성이 이미지에 포함됩니다.
+3.  **Test:** 빌드된 Docker 이미지 내에서 `tests.py`를 실행하여 단위 테스트를 수행합니다.
+4.  **Deploy:** 테스트를 통과한 이미지를 사용하여 기존 컨테이너를 중지/제거하고 새로운 버전의 컨테이너를 실행합니다.
+
+### 9.2. Dockerfile 주요 내용
+- **베이스 이미지:** `python:3.9-slim`
+- **의존성 설치:** `pip install -r requirements.txt`
+- **애플리케이션 실행:** `gunicorn`을 사용하여 WSGI 서버로 애플리케이션을 실행합니다.
+  ```bash
+  CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+  ```
