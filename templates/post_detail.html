@@ -1,6 +1,24 @@
 {% extends 'base.html' %}
 {% block title %}{{ post.title }} - Flask Board{% endblock %}
 {% block content %}
+<!-- Summernote CSS/JS (CDN) -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ko-KR.min.js"></script>
+
+<style>
+    /* 댓글 더보기 스타일 */
+    .comment-content {
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    .comment-content.collapsed {
+        max-height: 80px; /* 접혔을 때 높이 */
+        mask-image: linear-gradient(180deg, #000 60%, transparent); /* 아래쪽 흐릿하게 효과 */
+        -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent);
+    }
+</style>
+
 <!-- 게시물 -->
 <div class="card my-3">
     <div class="card-body">
@@ -12,7 +30,7 @@
             <span class="ml-2">조회: <span class="badge badge-secondary">{{ post.view_count }}</span></span>
         </div>
         <hr>
-        <div class="card-text" style="white-space: pre-line; min-height: 150px;">{{ post.content }}</div>
+        <div class="card-text" style="min-height: 150px;">{{ post.content|safe }}</div>
         <div class="d-flex justify-content-center my-3">
             {% if g.user and g.user != post.author %}
             <form action="{{ url_for('vote_post', post_id=post.id) }}" method="post">
@@ -45,7 +63,7 @@
             <span class="badge badge-success mb-2">채택된 답변</span>
             {% endif %}
             <h5 class="card-title">{{ answer.title }}</h5>
-            <div class="card-text" style="white-space: pre-line;">{{ answer.content }}</div>
+            <div class="card-text">{{ answer.content|safe }}</div>
             <div class="d-flex justify-content-between align-items-center mt-3">
                 <small class="text-muted">
                     작성자: <strong><a href="{{ url_for('user_profile', username=answer.author.username) }}"
@@ -54,6 +72,13 @@
                     }})
                 </small>
                 <div>
+                    {% if g.user and g.user != answer.author %}
+                    <form action="{{ url_for('vote_answer', answer_id=answer.id) }}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                            추천 <span class="badge badge-light">{{ answer.voters|length }}</span>
+                        </button>
+                    </form>
+                    {% endif %}
                     {% if g.user and g.user.id == post.author.id and not answer.is_adopted and post.author.id !=
                     answer.author.id %}
                     <form action="{{ url_for('adopt_answer', answer_id=answer.id) }}" method="post" class="d-inline">
@@ -87,8 +112,7 @@
     </div>
     <div class="form-group">
         <label for="answer_content">답변 내용</label>
-        <textarea name="content" id="answer_content" class="form-control" rows="5" required
-            placeholder="답변 내용을 입력하세요..."></textarea>
+        <textarea name="content" id="answer_content" class="form-control" required></textarea>
     </div>
     <button type="submit" class="btn btn-primary">답변 등록</button>
 </form>
@@ -105,15 +129,18 @@
         <strong><a href="{{ url_for('user_profile', username=comment.author.username) }}" class="text-dark">{{
                 comment.author.username }}</a></strong>
         <small class="text-muted">({{ comment.timestamp.strftime('%Y-%m-%d %H:%M') }})</small>
-        <div style="white-space: pre-line;" class="mt-1">{{ comment.content }}</div>
+        
+        <!-- 댓글 내용 영역 -->
+        <div class="comment-content mt-1">{{ comment.content|safe }}</div>
+        <a href="javascript:void(0);" class="read-more-btn btn btn-sm btn-light mt-1" style="display: none;">더보기</a>
+
         {% if g.user and g.user.id == comment.author.id %}
         <div class="mt-1">
             <a href="{{ url_for('update_comment', comment_id=comment.id) }}"
                 class="btn btn-sm btn-link text-secondary">수정</a>
-            <form action="{{ url_for('delete_comment', comment_id=comment.id) }}" method="post" class="d-inline">
-                <button type="submit" class="btn btn-sm btn-link text-danger"
-                    onclick="return confirm('정말로 이 댓글을 삭제하시겠습니까?');">삭제</button>
-            </form>
+            <button type="button" class="btn btn-sm btn-link text-danger" 
+                data-toggle="modal" data-target="#deleteCommentModal" 
+                data-url="{{ url_for('delete_comment', comment_id=comment.id) }}">삭제</button>
         </div>
         {% endif %}
     </div>
@@ -126,7 +153,7 @@
 {% if g.user %}
 <form method="post" class="my-3">
     <div class="form-group">
-        <textarea name="content" class="form-control" rows="3" required placeholder="댓글을 입력하세요..."></textarea>
+        <textarea name="content" id="comment_content" class="form-control" required></textarea>
     </div>
     <button type="submit" class="btn btn-secondary">댓글 작성</button>
 </form>
@@ -137,4 +164,77 @@
 <div class="text-center mt-4">
     <a href="{{ url_for('index') }}" class="btn btn-secondary">목록으로 돌아가기</a>
 </div>
+
+<!-- 댓글 삭제 확인 모달 -->
+<div class="modal fade" id="deleteCommentModal" tabindex="-1" role="dialog" aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCommentModalLabel">댓글 삭제 확인</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">정말로 이 댓글을 삭제하시겠습니까?</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                <form id="deleteCommentForm" method="post" action="">
+                    <button type="submit" class="btn btn-danger">삭제</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#answer_content').summernote({
+            height: 200,
+            lang: 'ko-KR',
+            placeholder: '답변 내용을 입력하세요...'
+        });
+
+        $('#comment_content').summernote({
+            height: 100,
+            lang: 'ko-KR',
+            placeholder: '댓글을 입력하세요...',
+            toolbar: [
+                ['font', ['bold', 'underline', 'clear']],
+                ['insert', ['link']],
+                ['view', ['codeview']]
+            ]
+        });
+
+        // 댓글 더보기/접기 기능
+        $('.comment-content').each(function() {
+            var contentHeight = $(this)[0].scrollHeight;
+            // 내용이 100px 보다 길면 접기 처리
+            if (contentHeight > 100) {
+                $(this).addClass('collapsed');
+                $(this).next('.read-more-btn').show();
+            }
+        });
+
+        // 더보기 버튼 클릭 이벤트
+        $('.read-more-btn').click(function() {
+            var content = $(this).prev('.comment-content');
+            
+            if (content.hasClass('collapsed')) {
+                content.removeClass('collapsed'); // 펼치기
+                $(this).text('접기');
+            } else {
+                content.addClass('collapsed'); // 접기
+                $(this).text('더보기');
+            }
+        });
+
+        // 댓글 삭제 모달 스크립트
+        $('#deleteCommentModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // 모달을 트리거한 버튼
+            var url = button.data('url'); // data-url 속성에서 삭제 URL 추출
+            var modal = $(this);
+            modal.find('#deleteCommentForm').attr('action', url); // 모달 내 폼의 action 업데이트
+        });
+    });
+</script>
 {% endblock %}

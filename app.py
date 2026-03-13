@@ -8,9 +8,8 @@ import os, datetime
 app = Flask(__name__)
 
 # --- 데이터베이스 설정 ---
-# 현재 파일의 경로를 기준으로 데이터베이스 파일 경로를 설정합니다.
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'board.db')
+# MariaDB 연결 설정 (사용자: funny, 비밀번호: strim100, 호스트: 192.168.1.23, DB: board)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://funny:strim100@192.168.1.23/board?charset=utf8mb4'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # flash 메시지, session 등 Flask의 특정 기능을 사용하려면 시크릿 키가 필요합니다.
 app.config['SECRET_KEY'] = 'dev' # 개발용 키입니다. 실제 운영 환경에서는 예측 불가능한 복잡한 키를 사용해야 합니다.
@@ -29,7 +28,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

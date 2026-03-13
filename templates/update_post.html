@@ -1,17 +1,35 @@
 {% extends 'base.html' %}
-{% block title %}글 수정{% endblock %}
+
+{% block title %}게시글 수정 - Flask Board{% endblock %}
+
 {% block content %}
-<h2 class="my-3">글 수정</h2>
-<form method="post" class="my-3">
+<!-- Summernote CSS/JS (CDN) -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ko-KR.min.js"></script>
+
+<h2 class="my-3 border-bottom pb-2">게시글 수정</h2>
+
+<form method="post">
     <div class="form-group">
         <label for="title">제목</label>
         <input type="text" class="form-control" name="title" id="title" value="{{ post.title }}" required>
     </div>
     <div class="form-group">
         <label for="content">내용</label>
-        <textarea class="form-control" name="content" id="content" rows="10" required>{{ post.content }}</textarea>
+        <!-- 텍스트 영역 안에 기존 post.content를 넣어줍니다. -->
+        <textarea class="form-control" name="content" id="summernote" required>{{ post.content }}</textarea>
     </div>
     <button type="submit" class="btn btn-primary">수정하기</button>
     <a href="{{ url_for('post_detail', post_id=post.id) }}" class="btn btn-secondary">취소</a>
 </form>
+
+<script>
+    $(document).ready(function() {
+        $('#summernote').summernote({
+            height: 400,
+            lang: 'ko-KR'
+        });
+    });
+</script>
 {% endblock %}
