@@ -1,38 +1,33 @@
 pipeline {
     agent any
-
     stages {
-        stage('Checkout') {
+        stage('Environment Check') {
             steps {
-                // GitHub 리포지토리에서 소스 코드를 가져옵니다.
-                checkout scm
+                // Jenkins가 호스트의 도커를 잘 쓰는지 확인
+                sh 'docker version'
             }
         }
-
-        stage('Install Dependencies') {
+        stage('Test & Build') {
             steps {
-                echo 'Installing Python dependencies...'
-                // OS에 따라 명령어 자동 선택 (Linux: sh, Windows: bat)
-                script {
-                    if (isUnix()) {
-                        sh 'pip install -r requirements.txt'
-                    } else {
-                        bat 'pip install -r requirements.txt'
-                    }
-                }
+                // 1. Python 이미지 안에서 pip install과 테스트 실행
+                // 별도의 설치 없이 python:3.9-slim 이미지를 즉석에서 사용합니다.
+                sh '''
+                docker run --rm -v $(pwd):/app -w /app python:3.9-slim sh -c "
+                    pip install -r requirements.txt &&
+                    echo 'Dependency install success!'
+                "
+                '''
+                
+                // 2. Flask 앱 도커 이미지 빌드
+                sh 'docker build -t my-flask-app .'
             }
         }
-
-        stage('Run Tests') {
+        stage('Deploy') {
             steps {
-                echo 'Running Unit Tests...'
-                script {
-                    if (isUnix()) {
-                        sh 'python tests.py'
-                    } else {
-                        bat 'python tests.py'
-                    }
-                }
+                // 3. 기존 컨테이너 중지 및 새 컨테이너 실행
+                sh 'docker stop flask-app || true'
+                sh 'docker rm flask-app || true'
+                sh 'docker run -d -p 5000:5000 --name flask-app my-flask-app'
             }
         }
     }

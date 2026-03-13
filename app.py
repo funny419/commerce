@@ -8,8 +8,10 @@ import os, datetime
 app = Flask(__name__)
 
 # --- 데이터베이스 설정 ---
-# MariaDB 연결 설정 (사용자: funny, 비밀번호: strim100, 호스트: 192.168.1.23, DB: board)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://funny:strim100@192.168.1.23/board?charset=utf8mb4'
+# 1. 환경 변수(DATABASE_URI)에서 데이터베이스 URI를 가져옵니다.
+# 2. 환경 변수가 없으면, 로컬 개발용 기본 URI를 사용합니다.
+db_uri = os.environ.get('DATABASE_URI', 'mysql+pymysql://funny:strim100@192.168.1.23/board?charset=utf8mb4')
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # flash 메시지, session 등 Flask의 특정 기능을 사용하려면 시크릿 키가 필요합니다.
 app.config['SECRET_KEY'] = 'dev' # 개발용 키입니다. 실제 운영 환경에서는 예측 불가능한 복잡한 키를 사용해야 합니다.
@@ -409,6 +411,3 @@ def edit_profile():
         return redirect(url_for('user_profile', username=g.user.username))
 
     return render_template('edit_profile.html')
-
-if __name__ == '__main__':
-    app.run(debug=True)
