@@ -7,10 +7,22 @@ import os, datetime
 
 app = Flask(__name__)
 
+# --- 환경 설정 (Environment Config) ---
+# APP_ENV 환경 변수로 실행 환경을 구분합니다. (기본값: 'local')
+app_env = os.environ.get('APP_ENV', 'local')
+print(f" * Current Environment: {app_env}")
+
 # --- 데이터베이스 설정 ---
-# 1. 환경 변수(DATABASE_URI)에서 데이터베이스 URI를 가져옵니다.
-# 2. 환경 변수가 없으면, 로컬 개발용 기본 URI를 사용합니다.
-db_uri = os.environ.get('DATABASE_URI', 'mysql+pymysql://funny:strim100@mariadb:4807/board?charset=utf8mb4')
+if app_env == 'production':
+    # Docker(Prod) 환경: docker-compose가 주입한 DATABASE_URI(db:4806) 사용
+    db_uri = os.environ.get('DATABASE_URI')
+    if not db_uri:
+        raise RuntimeError("Production 환경에서는 DATABASE_URI 설정이 필수입니다.")
+else:
+    # Local(Mac) 개발 환경: 윈도우 Docker의 원격 접속 정보(mariadb:4807) 사용
+    default_uri = 'mysql+pymysql://funny:strim100@mariadb:4807/board?charset=utf8mb4'
+    db_uri = os.environ.get('DATABASE_URI', default_uri)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # flash 메시지, session 등 Flask의 특정 기능을 사용하려면 시크릿 키가 필요합니다.

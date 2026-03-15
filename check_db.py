@@ -1,12 +1,8 @@
 import pymysql
 import sys
+import os
 
-# 접속 정보 설정
-DB_HOST = 'mariadb'
-DB_PORT = 4807
-DB_USER = 'funny'
-DB_PASSWORD = 'strim100'
-DB_NAME = 'board'
+# 접속 정보 설정os.environ.get('DB_NAME', 'board')
 
 print(f"[{DB_HOST}]의 데이터베이스 '{DB_NAME}'에 접속을 시도합니다...")
 

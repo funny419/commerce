@@ -16,7 +16,9 @@
 ## 3. 데이터베이스 정책 (Database Policy)
 
 ### 3.1. 연결 정보
-- **Host:** 192.168.2.23 (내부 윈도우 머신)
+- **Docker Compose 사용 시:**
+  - **웹 애플리케이션 (Flask) -> DB:** 서비스 이름 `db`와 내부 포트 `3306`을 사용합니다. (`DATABASE_URI` 환경 변수로 설정)
+  - **외부(호스트 PC) -> DB:** `localhost`와 외부 포트 `4807`을 사용합니다. (예: DB 관리 툴)
 - **DB Name:** board
 - **User:** funny / **Password:** strim100
 - **Library:** `pymysql` 드라이버 사용 (`mysql+pymysql://...`)
