@@ -2,7 +2,8 @@ import pymysql
 import sys
 
 # 접속 정보 설정
-DB_HOST = '192.168.1.23'
+DB_HOST = 'mariadb'
+DB_PORT = 4807
 DB_USER = 'funny'
 DB_PASSWORD = 'strim100'
 DB_NAME = 'board'
@@ -13,6 +14,7 @@ try:
     # 접속 시도
     connection = pymysql.connect(
         host=DB_HOST,
+        port=DB_PORT,
         user=DB_USER,
         password=DB_PASSWORD,
         db=DB_NAME,

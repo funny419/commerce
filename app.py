@@ -10,7 +10,7 @@ app = Flask(__name__)
 # --- 데이터베이스 설정 ---
 # 1. 환경 변수(DATABASE_URI)에서 데이터베이스 URI를 가져옵니다.
 # 2. 환경 변수가 없으면, 로컬 개발용 기본 URI를 사용합니다.
-db_uri = os.environ.get('DATABASE_URI', 'mysql+pymysql://funny:strim100@192.168.1.23/board?charset=utf8mb4')
+db_uri = os.environ.get('DATABASE_URI', 'mysql+pymysql://funny:strim100@mariadb:4807/board?charset=utf8mb4')
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # flash 메시지, session 등 Flask의 특정 기능을 사용하려면 시크릿 키가 필요합니다.
