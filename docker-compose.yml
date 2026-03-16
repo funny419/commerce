@@ -1,44 +1,29 @@
 version: '3.8'
 
 services:
-  # Flask 웹 애플리케이션 서비스
   web:
     build: .
-    container_name: flask-server
     ports:
       - "5000:5000"
-    environment:
-      # Docker 네트워크 내에서 'db'라는 서비스 이름으로 DB에 접속합니다.
-      - DATABASE_URI=mysql+pymysql://funny:strim100@db:4806/board?charset=utf8mb4
-      - APP_ENV=production
     depends_on:
-      # db 서비스가 완전히 준비된 후에 web 서비스를 시작합니다.
-      db:
-        condition: service_healthy
-    restart: always
+      - db
+    # .env 파일에 정의된 환경 변수를 사용합니다.
+    env_file:
+      - .env
 
-  # MariaDB 데이터베이스 서비스
   db:
     image: mariadb:10.5
-    container_name: mariadb-server
-    ports:
-      # 호스트의 4807 포트를 컨테이너의 3306 포트와 연결합니다.
-      - "4807:4806"
-    environment:
-      - MYSQL_ROOT_PASSWORD=strim100 # 보안을 위해 실제 사용할 비밀번호로 변경하세요.
-      - MYSQL_DATABASE=board
-      - MYSQL_USER=funny
-      - MYSQL_PASSWORD=strim100
-    volumes:
-      # DB 데이터를 영구적으로 보관하기 위해 볼륨을 사용합니다.
-      - mariadb_data:/var/lib/mysql
-    command: --port=4806
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-P", "4806", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     restart: always
+    environment:
+      # 루트 비밀번호는 더 강력한 값으로 변경하는 것을 권장합니다.
+      MYSQL_ROOT_PASSWORD: 'root_password_!@#'
+      MYSQL_DATABASE: 'board'
+      MYSQL_USER: 'funny'
+      MYSQL_PASSWORD: 'strim100'
+    ports:
+      - "4807:3306"
+    volumes:
+      - db_data:/var/lib/mysql
 
 volumes:
-  mariadb_data:
+  db_data:

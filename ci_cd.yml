@@ -39,10 +39,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Restart Services
-        # deploy.bat 내용을 직접 실행하거나, docker-compose 명령을 사용
+      ㅁㅊㅁ ㅁ
+      - name: Create .env file from secrets
+        # GitHub Secrets에 저장된 값으로 .env 파일을 생성합니다.
         run: |
+          echo APP_ENV=production > .env
+          echo DATABASE_URI=mysql+pymysql://funny:strim100@db:3306/board?charset=utf8mb4 >> .env
+          echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+        shell: cmd
+
+      - name: Restart Services with Docker Compose
+        run: |
+          echo "Restarting services..."
           docker-compose down
           docker-compose up -d --build
           docker image prune -f
