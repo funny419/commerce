@@ -47,6 +47,7 @@ jobs:
           "APP_ENV=production" | Out-File -FilePath .env -Encoding ascii
           "DATABASE_URI=mysql+pymysql://funny:${{ secrets.BOARD_MYSQL_PASSWORD }}@db:4806/board?charset=utf8mb4" | Add-Content -Path .env
           # 아래 줄이 추가되어야 DB 컨테이너가 정상적으로 뜹니다.
+          "BOARD_MYSQL_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}" | Add-Content -Path .env # 이 줄을 추가하세요!
           "MYSQL_ROOT_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}" | Add-Content -Path .env
           "MYSQL_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}" | Add-Content -Path .env
           "MYSQL_DATABASE=board" | Add-Content -Path .env
