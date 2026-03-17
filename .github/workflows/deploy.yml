@@ -35,23 +35,28 @@ jobs:
   deployment:
     needs: integration
     if: github.ref == 'refs/heads/main' # main 브랜치에 푸시된 경우에만 배포
-    runs-on: self-hosted # 윈도우 서버에 등록한 Runner 태그
+    runs-on: Windows # 윈도우 서버에 등록한 Runner 태그
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create .env file from secrets
-        # GitHub Secrets에 저장된 값으로 .env 파일을 생성합니다.
+      - name: Create .env file
+        shell: pwsh
         run: |
-          echo APP_ENV=production > .env
-          echo DATABASE_URI=mysql+pymysql://funny:strim100@db:3306/board?charset=utf8mb4 >> .env
-          echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
-        shell: cmd
+          # Out-File 명령은 첫 줄 생성 시, Add-Content는 추가 시 사용합니다.
+          "APP_ENV=production" | Out-File -FilePath .env -Encoding ascii
+          "DATABASE_URI=mysql+pymysql://funny:${{ secrets.BOARD_MYSQL_PASSWORD }}@db:4806/board?charset=utf8mb4" | Add-Content -Path .env
+          # 아래 줄이 추가되어야 DB 컨테이너가 정상적으로 뜹니다.
+          "MYSQL_ROOT_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}" | Add-Content -Path .env
+          "MYSQL_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}" | Add-Content -Path .env
+          "MYSQL_DATABASE=board" | Add-Content -Path .env
+          "MYSQL_USER=funny" | Add-Content -Path .env
 
       - name: Restart Services with Docker Compose
+        shell: pwsh
         run: |
-          echo "Restarting services..."
+          Write-Host "Restarting services on Windows 10..."
           docker-compose down
           docker-compose up -d --build
+          # 미사용 이미지 정리 (공간 확보)
           docker image prune -f
-        shell: cmd
