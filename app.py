@@ -26,7 +26,8 @@ else:
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # flash 메시지, session 등 Flask의 특정 기능을 사용하려면 시크릿 키가 필요합니다.
-app.config['SECRET_KEY'] = 'dev' # 개발용 키입니다. 실제 운영 환경에서는 예측 불가능한 복잡한 키를 사용해야 합니다.
+# 배포 환경에서는 환경 변수에서 가져오고, 로컬에서는 'dev'를 기본값으로 사용합니다.
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev')
 
 db = SQLAlchemy(app)
 

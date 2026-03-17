@@ -47,6 +47,7 @@ jobs:
           $envContent = @"
           APP_ENV=production
           DATABASE_URI=mysql+pymysql://funny:${{ secrets.BOARD_MYSQL_PASSWORD }}@db:3306/board?charset=utf8mb4
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
           BOARD_MYSQL_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}
           MYSQL_ROOT_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}
           MYSQL_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}
