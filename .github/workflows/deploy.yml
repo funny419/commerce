@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create .env file
-        shell: pwsh
+        shell: powershell
         run: |
           # Out-File 명령은 첫 줄 생성 시, Add-Content는 추가 시 사용합니다.
           "APP_ENV=production" | Out-File -FilePath .env -Encoding ascii
@@ -53,7 +53,7 @@ jobs:
           "MYSQL_USER=funny" | Add-Content -Path .env
 
       - name: Restart Services with Docker Compose
-        shell: pwsh
+        shell: powershell
         run: |
           Write-Host "Restarting services on Windows 10..."
           docker-compose down
