@@ -61,5 +61,17 @@ jobs:
           Write-Host "Restarting services on Windows 10..."
           docker-compose down
           docker-compose up -d --build
-          # 미사용 이미지 정리 (공간 확보)
+
+      - name: Initialize Database
+        shell: powershell
+        run: |
+          Write-Host "Initializing database (creating tables if not exist)..."
+          # init_db.py 스크립트는 DB가 준비될 때까지 몇 초간 재시도 후 테이블을 생성합니다.
+          # 이 과정이 성공하면 DB 접속이 정상적으로 이루어진 것입니다.
+          docker-compose exec -T web python init_db.py
+
+      - name: Clean up unused Docker images
+        shell: powershell
+        run: |
+          Write-Host "Cleaning up unused docker images..."
           docker image prune -f

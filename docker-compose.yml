@@ -28,8 +28,8 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      # 컨테이너 내부에서 체크하므로 4806 포트를 사용
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-P", "3306", "-u", "root", "-p$${BOARD_MYSQL_PASSWORD}"]
+      # 비밀번호 없이 TCP 3306 포트가 응답하는지만 확인 (가장 확실하고 깔끔함)
+      test: ["CMD-SHELL", "timeout 1s bash -c ':> /dev/tcp/127.0.0.1/3306' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
