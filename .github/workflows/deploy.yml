@@ -43,15 +43,17 @@ jobs:
       - name: Create .env file
         shell: powershell
         run: |
-          # Out-File 명령은 첫 줄 생성 시, Add-Content는 추가 시 사용합니다.
-          "APP_ENV=production" | Out-File -FilePath .env -Encoding ascii
-          "DATABASE_URI=mysql+pymysql://funny:${{ secrets.BOARD_MYSQL_PASSWORD }}@db:4806/board?charset=utf8mb4" | Add-Content -Path .env
-          # 아래 줄이 추가되어야 DB 컨테이너가 정상적으로 뜹니다.
-          "BOARD_MYSQL_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}" | Add-Content -Path .env # 이 줄을 추가하세요!
-          "MYSQL_ROOT_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}" | Add-Content -Path .env
-          "MYSQL_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}" | Add-Content -Path .env
-          "MYSQL_DATABASE=board" | Add-Content -Path .env
-          "MYSQL_USER=funny" | Add-Content -Path .env
+          # PowerShell Here-String을 사용하여 .env 내용을 변수에 담고 한 번에 저장합니다.
+          $envContent = @"
+          APP_ENV=production
+          DATABASE_URI=mysql+pymysql://funny:${{ secrets.BOARD_MYSQL_PASSWORD }}@db:3306/board?charset=utf8mb4
+          BOARD_MYSQL_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}
+          MYSQL_ROOT_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}
+          MYSQL_PASSWORD=${{ secrets.BOARD_MYSQL_PASSWORD }}
+          MYSQL_DATABASE=board
+          MYSQL_USER=funny
+          "@
+          $envContent | Out-File -FilePath .env -Encoding ascii
 
       - name: Restart Services with Docker Compose
         shell: powershell

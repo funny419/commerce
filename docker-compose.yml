@@ -24,12 +24,12 @@ services:
       MYSQL_USER: 'funny'
       MYSQL_PASSWORD: ${BOARD_MYSQL_PASSWORD}
     ports:
-      - "4807:4806"
+      - "4807:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
       # 컨테이너 내부에서 체크하므로 4806 포트를 사용
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-P", "4806", "-u", "root", "-p$${BOARD_MYSQL_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-P", "3306", "-u", "root", "-p$${BOARD_MYSQL_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5

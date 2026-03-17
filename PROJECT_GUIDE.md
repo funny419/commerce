@@ -118,7 +118,7 @@ $('#comment_content').summernote({
 
 ## 9. CI/CD (지속적 통합/배포)
 - **도구:** GitHub Actions, Docker, Docker Compose
-- **파이프라인 정의:** `.github/workflows/ci_cd.yml`
+- **파이프라인 정의:** `.github/workflows/deploy.yml`
 - **배포 대상:** Windows 10 (Self-Hosted Runner 사용)
 
 ### 9.1. 파이프라인 단계 (Workflow)
