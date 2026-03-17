@@ -35,7 +35,7 @@ jobs:
   deployment:
     needs: integration
     if: github.ref == 'refs/heads/main' # main 브랜치에 푸시된 경우에만 배포
-    runs-on: Windows # 윈도우 서버에 등록한 Runner 태그
+    runs-on: [self-hosted, Windows, X64] # 윈도우 서버에 등록한 Runner 태그
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
