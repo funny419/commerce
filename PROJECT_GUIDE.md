@@ -11,7 +11,7 @@
 - **Frontend:** HTML5, CSS3, JavaScript (jQuery)
 - **UI Framework:** Bootstrap 4.6
 - **Editor:** Summernote (WYSIWYG)
-- **DevOps:** Docker, Jenkins
+- **DevOps:** Docker, GitHub Actions
 
 ## 3. 데이터베이스 정책 (Database Policy)
 
@@ -117,20 +117,17 @@ $('#comment_content').summernote({
   ```
 
 ## 9. CI/CD (지속적 통합/배포)
-- **도구:** Jenkins, Docker
-- **파이프라인 정의:** `Jenkinsfile` (Groovy Script)
-- **배포 환경:** `Dockerfile`을 사용하여 Gunicorn 기반의 WSGI 서버 환경을 구축합니다.
+- **도구:** GitHub Actions, Docker, Docker Compose
+- **파이프라인 정의:** `.github/workflows/ci_cd.yml`
+- **배포 대상:** Windows 10 (Self-Hosted Runner 사용)
 
-### 9.1. Jenkins 파이프라인 단계
-1.  **Environment Check:** Jenkins 에이전트의 Docker 환경을 확인합니다.
-2.  **Build:** `Dockerfile`을 사용하여 애플리케이션의 Docker 이미지를 빌드합니다. 이 과정에서 소스 코드와 `requirements.txt`에 명시된 의존성이 이미지에 포함됩니다.
-3.  **Test:** 빌드된 Docker 이미지 내에서 `tests.py`를 실행하여 단위 테스트를 수행합니다.
-4.  **Deploy:** 테스트를 통과한 이미지를 사용하여 기존 컨테이너를 중지/제거하고 새로운 버전의 컨테이너를 실행합니다.
-
-### 9.2. Dockerfile 주요 내용
-- **베이스 이미지:** `python:3.9-slim`
-- **의존성 설치:** `pip install -r requirements.txt`
-- **애플리케이션 실행:** `gunicorn`을 사용하여 WSGI 서버로 애플리케이션을 실행합니다.
-  ```bash
-  CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
-  ```
+### 9.1. 파이프라인 단계 (Workflow)
+1.  **Integration (CI):** GitHub 호스팅 Linux 서버(`ubuntu-latest`)에서 실행됩니다.
+    -   Python 환경 설정 및 의존성 설치 (`requirements.txt`).
+    -   `tests.py`를 실행하여 단위 테스트 검증.
+    -   `Dockerfile` 빌드 테스트를 통해 이미지 생성 가능 여부 확인.
+2.  **Deployment (CD):** 배포 대상인 Windows 10 Self-Hosted Runner에서 실행됩니다.
+    -   최신 소스 코드 체크아웃 (Checkout).
+    -   GitHub Secrets 및 설정값을 기반으로 `.env` 파일 생성.
+    -   `docker-compose`를 사용하여 기존 컨테이너 중단 후 최신 코드로 재빌드 및 실행.
+    -   사용하지 않는 Docker 이미지 정리 (Prune).
